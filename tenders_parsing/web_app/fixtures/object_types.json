@@ -1,0 +1,30 @@
+[
+    {
+        "model": "web_app.objecttype",
+        "pk": 1,
+        "fields": {
+            "name": "Работа"
+        }
+    },
+    {
+        "model": "web_app.objecttype",
+        "pk": 2,
+        "fields": {
+            "name": "Услуга"
+        }
+    },
+    {
+        "model": "web_app.objecttype",
+        "pk": 3,
+        "fields": {
+            "name": "Товар"
+        }
+    },
+    {
+        "model": "web_app.objecttype",
+        "pk": 4,
+        "fields": {
+            "name": "Не указано"
+        }
+    }
+]
