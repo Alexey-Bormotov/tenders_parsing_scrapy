@@ -36,7 +36,6 @@ requests-file==1.5.1
 Scrapy==2.8.0
 service-identity==21.1.0
 six==1.16.0
-SQLAlchemy==2.0.9
 sqlparse==0.4.3
 tldextract==3.4.0
 Twisted==22.10.0

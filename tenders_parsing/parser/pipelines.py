@@ -9,11 +9,10 @@ class ParserPipeline:
             name=item['tender_type']
         )
         region, _ = Region.objects.get_or_create(name=item['region'])
-        if ObjectType.objects.filter(name=item['object_type']).exists():
-            object_type = ObjectType.objects.get(name=item['object_type'])
-        else:
-            object_type = ObjectType.objects.get(name='Не указано')
-
+        object_type = (
+            ObjectType.objects.filter(name=item['object_type']).first()
+            or ObjectType.objects.get(name='Не указано')
+        )
         try:
             Tender.objects.update_or_create(
                 number=item['number'],
