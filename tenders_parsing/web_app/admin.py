@@ -1,7 +1,9 @@
 from admin_numeric_filter.admin import RangeNumericFilter
 from django.contrib import admin
 
-from .models import Customer, ObjectType, Organizer, Region, Tender, TenderType
+from .models import (
+    Customer, ObjectType, Organizer, Region, Tender, TenderType, TenderItem
+)
 
 
 @admin.register(TenderType)
@@ -68,3 +70,19 @@ class TenderAdmin(admin.ModelAdmin):
         'region'
     )
     search_fields = ('number', 'title')
+
+
+@admin.register(TenderItem)
+class TenderAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'code',
+        'title',
+        'quantity',
+        'price',
+        'tender'
+    )
+    list_filter = (
+        ('price', RangeNumericFilter),
+    )
+    search_fields = ('code', 'title')

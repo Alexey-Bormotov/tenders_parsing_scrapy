@@ -147,4 +147,36 @@ class Tender(models.Model):
         ordering = ('-start_date',)
 
     def __str__(self):
-        return str(self.number) + ' ' + self.title[:50]
+        return self.number + ' ' + self.title[:50]
+
+
+class TenderItem(models.Model):
+    """ Предмет закупки/контракта. """
+
+    code = models.TextField(
+        verbose_name='Код предмета по ОКПД',
+    )
+    title = models.TextField(
+        verbose_name='Наименование предмета',
+        db_index=True
+    )
+    quantity = models.FloatField(
+        verbose_name='Количество'
+    )
+    price = models.FloatField(
+        verbose_name='Стоимость'
+    )
+    tender = models.ForeignKey(
+        Tender,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name='Тендер предмета',
+        null=True
+    )
+
+    class Meta:
+        verbose_name = 'Предмет закупки/контакта'
+        verbose_name_plural = 'Предметы закупки/контакта'
+
+    def __str__(self):
+        return self.code

@@ -12,3 +12,4 @@ class ParserItem(scrapy.Item):
     object_type = scrapy.Field()
     customer = scrapy.Field()
     region = scrapy.Field()
+    tender_items = scrapy.Field()

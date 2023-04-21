@@ -1,7 +1,7 @@
 from scrapy.exceptions import DropItem
 
 from web_app.models import (
-    Customer, ObjectType, Organizer, Region, Tender, TenderType
+    Customer, ObjectType, Organizer, Region, Tender, TenderItem, TenderType
 )
 
 
@@ -18,7 +18,7 @@ class ParserPipeline:
         customer, _ = Customer.objects.get_or_create(name=item['customer'])
         region, _ = Region.objects.get_or_create(name=item['region'])
         try:
-            Tender.objects.update_or_create(
+            tender, _ = Tender.objects.update_or_create(
                 number=item['number'],
                 tender_type=tender_type,
                 title=item['title'],
@@ -31,5 +31,23 @@ class ParserPipeline:
                 region=region
             )
         except Exception as error:
-            raise DropItem('Не удалось сохранить тендер в базу данных:', error)
+            raise DropItem(
+                f'Не удалось сохранить тендер c номером {item["number"]} '
+                f'в базу данных: {error}'
+            )
+        try:
+            for tender_item in item['tender_items']:
+                print(tender_item)
+                TenderItem.objects.create(
+                    code=tender_item[0],
+                    title=tender_item[1],
+                    quantity=tender_item[2],
+                    price=tender_item[3],
+                    tender=tender
+                )
+        except Exception as error:
+            raise DropItem(
+                f'Не удалось сохранить предметы закупки/контракта для '
+                f'тендера {tender} в базу данных: {error}'
+            )
         return item

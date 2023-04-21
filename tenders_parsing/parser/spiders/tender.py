@@ -47,6 +47,37 @@ class TenderSpider(scrapy.Spider):
         )
         return tender_url, customer_url
 
+    @staticmethod
+    def __parse_tender_items(response):
+        """ Парсинг предметов закупки/контракта. """
+
+        tender_items = []
+        for tender_item in response.css('table[id$="tems"] tbody tr'):
+            code = tender_item.css('input[name*="okpd2"]::attr(value)').get()
+            if not code[0].isdigit():
+                continue
+            title = tender_item.css('input[name*="name"]::attr(value)').get()
+            if not title:
+                title = tender_item.css(
+                    'input[name*="mnn"]::attr(value)'
+                ).get()
+            quantity = float(
+                re.sub(
+                    r'[^\d.]',
+                    '',
+                    tender_item.css('td.items-number div::text').get()
+                )
+            )
+            price = float(
+                re.sub(
+                    r'[^\d.]',
+                    '',
+                    tender_item.css('td.items-cost div::text').get()
+                )
+            )
+            tender_items.append((code, title, quantity, price))
+        return tender_items
+
     @classmethod
     def __get_max_price(cls, response):
         """ Парсинг максимальной цены тендера. """
@@ -125,7 +156,8 @@ class TenderSpider(scrapy.Spider):
             re.sub(
                 r'[^\d.]',
                 '',
-                response.css('div[id="common-info-maxSum"]::text').get())
+                response.css('div[id="common-info-maxSum"]::text').get()
+            )
         )
         item['organizer'] = response.css(
             'div[id=common-responsible-fullName]::text'
@@ -147,6 +179,7 @@ class TenderSpider(scrapy.Spider):
         item['object_type'] = response.css(
             'table[id="common-items"] tbody tr td div::text'
         ).get()
+        item['tender_items'] = self.__parse_tender_items(response)
         yield response.follow(
             response.meta['customer_url'],
             callback=self.parse_customer,
@@ -164,5 +197,4 @@ class TenderSpider(scrapy.Spider):
         item['region'] = response.css(
             'div[id="CustomerInfo-locationInfo-region"]::text'
         ).get()
-
         yield item
