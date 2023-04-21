@@ -1,7 +1,31 @@
+from admin_numeric_filter.admin import RangeNumericFilter
 from django.contrib import admin
 
-from .filters import PriceRangeFilter
-from .models import ObjectType, Region, Tender, TenderType
+from .models import Customer, ObjectType, Organizer, Region, Tender, TenderType
+
+
+@admin.register(TenderType)
+class TenderTypeAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'name'
+    )
+
+
+@admin.register(Organizer)
+class OrganizerAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'name'
+    )
+
+
+@admin.register(Customer)
+class CustomerAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'name'
+    )
 
 
 @admin.register(ObjectType)
@@ -14,14 +38,6 @@ class ObjectTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Region)
 class RegionAdmin(admin.ModelAdmin):
-    list_display = (
-        'pk',
-        'name'
-    )
-
-
-@admin.register(TenderType)
-class TenderTypeAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'name'
@@ -46,7 +62,7 @@ class TenderAdmin(admin.ModelAdmin):
     list_filter = (
         'start_date',
         'end_date',
-        PriceRangeFilter,
+        ('price', RangeNumericFilter),
         'tender_type',
         'object_type',
         'region'

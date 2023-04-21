@@ -35,6 +35,38 @@ class ObjectType(models.Model):
         return self.name
 
 
+class Organizer(models.Model):
+    """ Организатор. """
+
+    name = models.TextField(
+        verbose_name='Наименование организатора',
+        unique=True
+    )
+
+    class Meta:
+        verbose_name = 'Организатор'
+        verbose_name_plural = 'Организаторы'
+
+    def __str__(self):
+        return self.name
+
+
+class Customer(models.Model):
+    """ Заказчик. """
+
+    name = models.TextField(
+        verbose_name='Наименование заказчика',
+        unique=True
+    )
+
+    class Meta:
+        verbose_name = 'Заказчик'
+        verbose_name_plural = 'Заказчики'
+
+    def __str__(self):
+        return self.name
+
+
 class Region(models.Model):
     """ Регион заказчика. """
 
@@ -87,11 +119,19 @@ class Tender(models.Model):
         verbose_name='Тип объекта закупки',
         null=True
     )
-    organizer = models.TextField(
+    organizer = models.ForeignKey(
+        Organizer,
+        on_delete=models.SET_NULL,
+        related_name='tenders',
         verbose_name='Организатор',
+        null=True
     )
-    customer = models.TextField(
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.SET_NULL,
+        related_name='tenders',
         verbose_name='Заказчик',
+        null=True
     )
     region = models.ForeignKey(
         Region,

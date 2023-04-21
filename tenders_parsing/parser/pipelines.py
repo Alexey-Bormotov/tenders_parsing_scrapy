@@ -1,6 +1,8 @@
 from scrapy.exceptions import DropItem
 
-from web_app.models import ObjectType, Region, Tender, TenderType
+from web_app.models import (
+    Customer, ObjectType, Organizer, Region, Tender, TenderType
+)
 
 
 class ParserPipeline:
@@ -8,22 +10,24 @@ class ParserPipeline:
         tender_type, _ = TenderType.objects.get_or_create(
             name=item['tender_type']
         )
-        region, _ = Region.objects.get_or_create(name=item['region'])
+        organizer, _ = Organizer.objects.get_or_create(name=item['organizer'])
         object_type = (
             ObjectType.objects.filter(name=item['object_type']).first()
             or ObjectType.objects.get(name='Не указано')
         )
+        customer, _ = Customer.objects.get_or_create(name=item['customer'])
+        region, _ = Region.objects.get_or_create(name=item['region'])
         try:
             Tender.objects.update_or_create(
                 number=item['number'],
                 tender_type=tender_type,
                 title=item['title'],
                 price=item['price'],
-                organizer=item['organizer'],
+                organizer=organizer,
                 start_date=item['start_date'],
                 end_date=item['end_date'],
                 object_type=object_type,
-                customer=item['customer'],
+                customer=customer,
                 region=region
             )
         except Exception as error:
