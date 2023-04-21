@@ -37,7 +37,6 @@ class ParserPipeline:
             )
         try:
             for tender_item in item['tender_items']:
-                print(tender_item)
                 TenderItem.objects.create(
                     code=tender_item[0],
                     title=tender_item[1],
