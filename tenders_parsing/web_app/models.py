@@ -35,40 +35,8 @@ class ObjectType(models.Model):
         return self.name
 
 
-class Organizer(models.Model):
-    """ Организатор. """
-
-    name = models.TextField(
-        verbose_name='Наименование организатора',
-        unique=True
-    )
-
-    class Meta:
-        verbose_name = 'Организатор'
-        verbose_name_plural = 'Организаторы'
-
-    def __str__(self):
-        return self.name
-
-
-class Customer(models.Model):
-    """ Заказчик. """
-
-    name = models.TextField(
-        verbose_name='Наименование заказчика',
-        unique=True
-    )
-
-    class Meta:
-        verbose_name = 'Заказчик'
-        verbose_name_plural = 'Заказчики'
-
-    def __str__(self):
-        return self.name
-
-
 class Region(models.Model):
-    """ Регион заказчика. """
+    """ Регион организатора/заказчика. """
 
     name = models.CharField(
         verbose_name='Наименование региона',
@@ -82,6 +50,76 @@ class Region(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class JuridicalPerson(models.Model):
+    """ Юридическое лицо (организатор/заказчик). """
+
+    name = models.TextField(
+        verbose_name='Наименование юрлица',
+    )
+    short_name = models.TextField(
+        verbose_name='Краткое наименование',
+        null=True
+    )
+    registration_date = models.DateTimeField(
+        verbose_name='Дата регистрации'
+    )
+    inn = models.CharField(
+        verbose_name='ИНН',
+        max_length=20,
+        unique=True
+    )
+    ogrn = models.CharField(
+        verbose_name='ОГРН',
+        max_length=20
+    )
+    kpp = models.CharField(
+        verbose_name='КПП',
+        max_length=20
+    )
+    web_site = models.URLField(
+        verbose_name='Адрес web сайта',
+        null=True
+    )
+    eis_number = models.CharField(
+        verbose_name='Номер в ЕИС',
+        max_length=20
+    )
+    telephone = models.CharField(
+        verbose_name='Телефон',
+        max_length=20,
+        null=True
+    )
+    email = models.EmailField(
+        verbose_name='Электронная почта'
+    )
+    fax = models.CharField(
+        verbose_name='Факс',
+        max_length=20,
+        null=True
+    )
+    contact_person = models.CharField(
+        verbose_name='Контактное лицо',
+        max_length=100
+    )
+    address = models.TextField(
+        verbose_name='Юридический адрес',
+    )
+    region = models.ForeignKey(
+        Region,
+        on_delete=models.SET_NULL,
+        related_name='juridical_persons',
+        verbose_name='Регион',
+        null=True
+    )
+
+    class Meta:
+        verbose_name = 'Юридическое лицо'
+        verbose_name_plural = 'Юридические лица'
+
+    def __str__(self):
+        return self.name[:50]
 
 
 class Tender(models.Model):
@@ -120,20 +158,20 @@ class Tender(models.Model):
         null=True
     )
     organizer = models.ForeignKey(
-        Organizer,
+        JuridicalPerson,
         on_delete=models.SET_NULL,
-        related_name='tenders',
+        related_name='organizer_tenders',
         verbose_name='Организатор',
         null=True
     )
     customer = models.ForeignKey(
-        Customer,
+        JuridicalPerson,
         on_delete=models.SET_NULL,
-        related_name='tenders',
+        related_name='customer_tenders',
         verbose_name='Заказчик',
         null=True
     )
-    region = models.ForeignKey(
+    customer_region = models.ForeignKey(
         Region,
         on_delete=models.SET_NULL,
         related_name='tenders',
@@ -177,6 +215,12 @@ class TenderItem(models.Model):
     class Meta:
         verbose_name = 'Предмет закупки/контакта'
         verbose_name_plural = 'Предметы закупки/контакта'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('code', 'title', 'quantity', 'price', 'tender'),
+                name='unique_tender_item'
+            )
+        ]
 
     def __str__(self):
         return self.code

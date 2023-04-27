@@ -2,7 +2,7 @@ from admin_numeric_filter.admin import RangeNumericFilter
 from django.contrib import admin
 
 from .models import (
-    Customer, ObjectType, Organizer, Region, Tender, TenderType, TenderItem
+    JuridicalPerson, ObjectType, Region, Tender, TenderType, TenderItem
 )
 
 
@@ -14,20 +14,27 @@ class TenderTypeAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(Organizer)
-class OrganizerAdmin(admin.ModelAdmin):
+@admin.register(JuridicalPerson)
+class JuridicalPersonAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
-        'name'
+        'name',
+        'short_name',
+        'registration_date',
+        'inn',
+        'ogrn',
+        'kpp',
+        'web_site',
+        'eis_number',
+        'telephone',
+        'email',
+        'fax',
+        'contact_person',
+        'address',
+        'region'
     )
-
-
-@admin.register(Customer)
-class CustomerAdmin(admin.ModelAdmin):
-    list_display = (
-        'pk',
-        'name'
-    )
+    list_filter = ('region',)
+    search_fields = ('name', 'short_name', 'inn')
 
 
 @admin.register(ObjectType)
@@ -59,7 +66,7 @@ class TenderAdmin(admin.ModelAdmin):
         'start_date',
         'end_date',
         'object_type',
-        'region'
+        'customer_region'
     )
     list_filter = (
         'start_date',
@@ -67,13 +74,13 @@ class TenderAdmin(admin.ModelAdmin):
         ('price', RangeNumericFilter),
         'tender_type',
         'object_type',
-        'region'
+        'customer_region'
     )
     search_fields = ('number', 'title')
 
 
 @admin.register(TenderItem)
-class TenderAdmin(admin.ModelAdmin):
+class TenderItemAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'code',
@@ -85,4 +92,4 @@ class TenderAdmin(admin.ModelAdmin):
     list_filter = (
         ('price', RangeNumericFilter),
     )
-    search_fields = ('code', 'title')
+    search_fields = ('code', 'title', 'tender__number')

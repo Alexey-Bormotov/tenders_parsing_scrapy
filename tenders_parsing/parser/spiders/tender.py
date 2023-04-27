@@ -35,17 +35,20 @@ class TenderSpider(scrapy.Spider):
         )
 
     @staticmethod
-    def __parse_tender_and_customer_url(tender):
-        """ Парсинг URL для тендера и заказчика. """
+    def __parse_tender_organizer_and_customer_url(tender):
+        """ Парсинг URL для тендера, организатора и заказчика. """
 
         tender_url = tender.css(
             'td.row-procedure_name a::attr(href)'
+        ).get()
+        organizer_url = tender.css(
+            'td.row-placer_name a::attr(href)'
         ).get()
         customer_url = urljoin(
             BASE_URL,
             tender.css('td.row-customer_name a::attr(href)').get()
         )
-        return tender_url, customer_url
+        return tender_url, organizer_url, customer_url
 
     @staticmethod
     def __parse_tender_items(response):
@@ -54,7 +57,7 @@ class TenderSpider(scrapy.Spider):
         tender_items = []
         for tender_item in response.css('table[id$="tems"] tbody tr'):
             code = tender_item.css('input[name*="okpd2"]::attr(value)').get()
-            if not code[0].isdigit():
+            if code and not code[0].isdigit():
                 continue
             title = tender_item.css('input[name*="name"]::attr(value)').get()
             if not title:
@@ -126,14 +129,17 @@ class TenderSpider(scrapy.Spider):
         for tender in response.css('table.table-hover tbody tr'):
             if not self.full_parsing and self.__check_tender_existence(tender):
                 continue
-            tender_url, customer_url = (
-                self.__parse_tender_and_customer_url(tender)
+            tender_url, organizer_url, customer_url = (
+                self.__parse_tender_organizer_and_customer_url(tender)
             )
             yield response.follow(
                 tender_url,
                 callback=self.parse_tender,
                 dont_filter=True,
-                meta={'customer_url': customer_url}
+                meta={
+                    'organizer_url': organizer_url,
+                    'customer_url': customer_url
+                }
             )
         next_page_url = self.__generate_next_page_url(response)
         if next_page_url:
@@ -181,6 +187,77 @@ class TenderSpider(scrapy.Spider):
         ).get()
         item['tender_items'] = self.__parse_tender_items(response)
         yield response.follow(
+            response.meta['organizer_url'],
+            callback=self.parse_organizer,
+            dont_filter=True,
+            meta={
+                'item': item,
+                'customer_url': response.meta['customer_url']
+            }
+        )
+
+    def parse_organizer(self, response):
+        """ Парсинг страницы организатора. """
+
+        registration_date = dt.strptime(
+            response.css(
+                'div[id="CustomerInfo-etpCreateDateTime"]::text'
+            ).get()[:16],
+            DATETIME_FORMAT
+        )
+        name = response.css(
+            'div[id="CustomerInfo-commonInfo-fullName"]::text'
+        ).get()
+        short_name = response.css(
+            'div[id="CustomerInfo-commonInfo-shortName"]::text'
+        ).get()
+        inn = response.css(
+            'div[id="CustomerInfo-commonInfo-inn"]::text'
+        ).get()
+        ogrn = response.css(
+            'div[id="CustomerInfo-commonInfo-ogrn"]::text'
+        ).get()
+        kpp = response.css(
+            'div[id="CustomerInfo-commonInfo-kpp"]::text'
+        ).get()
+        web_site = response.css(
+            'div[id="CustomerInfo-commonInfo-website"]::text'
+        ).get()
+        eis_number = response.css(
+            'div[id="CustomerInfo-commonInfo-oosRegistrationNumber"]::text'
+        ).get()
+        telephone = response.css(
+            'div[id="CustomerInfo-commonInfo-phone"]::text'
+        ).get()
+        email = response.css(
+            'div[id="CustomerInfo-commonInfo-email"]::text'
+        ).get()
+        fax = response.css(
+            'div[id="CustomerInfo-commonInfo-fax"]::text'
+        ).get()
+        contact_person = (
+            response.css(
+                'div[id="CustomerInfo-commonInfo-contactPerson-lastName"]::text'
+            ).get()
+            + ' ' + response.css(
+                'div[id="CustomerInfo-commonInfo-contactPerson-firstName"]::text'
+            ).get()
+            + ' ' + response.css(
+                'div[id="CustomerInfo-commonInfo-contactPerson-middleName"]::text'
+            ).get()
+        )
+        address = response.css(
+            'div[id="CustomerInfo-locationInfo-address"]::text'
+        ).get()
+        region = response.css(
+            'div[id="CustomerInfo-locationInfo-region"]::text'
+        ).get()
+        item = response.meta['item']
+        item['organizer'] = (
+            name, short_name, registration_date, inn, ogrn, kpp, web_site,
+            eis_number, telephone, email, fax, contact_person, address, region
+        )
+        yield response.follow(
             response.meta['customer_url'],
             callback=self.parse_customer,
             dont_filter=True,
@@ -190,11 +267,62 @@ class TenderSpider(scrapy.Spider):
     def parse_customer(self, response):
         """ Парсинг страницы заказчика. """
 
-        item = response.meta['item']
-        item['customer'] = response.css(
+        registration_date = dt.strptime(
+            response.css(
+                'div[id="CustomerInfo-etpCreateDateTime"]::text'
+            ).get()[:16],
+            DATETIME_FORMAT
+        )
+        name = response.css(
             'div[id="CustomerInfo-commonInfo-fullName"]::text'
         ).get()
-        item['region'] = response.css(
+        short_name = response.css(
+            'div[id="CustomerInfo-commonInfo-shortName"]::text'
+        ).get()
+        inn = response.css(
+            'div[id="CustomerInfo-commonInfo-inn"]::text'
+        ).get()
+        ogrn = response.css(
+            'div[id="CustomerInfo-commonInfo-ogrn"]::text'
+        ).get()
+        kpp = response.css(
+            'div[id="CustomerInfo-commonInfo-kpp"]::text'
+        ).get()
+        web_site = response.css(
+            'div[id="CustomerInfo-commonInfo-website"]::text'
+        ).get()
+        eis_number = response.css(
+            'div[id="CustomerInfo-commonInfo-oosRegistrationNumber"]::text'
+        ).get()
+        telephone = response.css(
+            'div[id="CustomerInfo-commonInfo-phone"]::text'
+        ).get()
+        email = response.css(
+            'div[id="CustomerInfo-commonInfo-email"]::text'
+        ).get()
+        fax = response.css(
+            'div[id="CustomerInfo-commonInfo-fax"]::text'
+        ).get()
+        contact_person = (
+            response.css(
+                'div[id="CustomerInfo-commonInfo-contactPerson-lastName"]::text'
+            ).get()
+            + ' ' + response.css(
+                'div[id="CustomerInfo-commonInfo-contactPerson-firstName"]::text'
+            ).get()
+            + ' ' + response.css(
+                'div[id="CustomerInfo-commonInfo-contactPerson-middleName"]::text'
+            ).get()
+        )
+        address = response.css(
+            'div[id="CustomerInfo-locationInfo-address"]::text'
+        ).get()
+        region = response.css(
             'div[id="CustomerInfo-locationInfo-region"]::text'
         ).get()
+        item = response.meta['item']
+        item['customer'] = (
+            name, short_name, registration_date, inn, ogrn, kpp, web_site,
+            eis_number, telephone, email, fax, contact_person, address, region
+        )
         yield item
