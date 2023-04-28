@@ -41,9 +41,10 @@ class TenderSpider(scrapy.Spider):
         tender_url = tender.css(
             'td.row-procedure_name a::attr(href)'
         ).get()
-        organizer_url = tender.css(
-            'td.row-placer_name a::attr(href)'
-        ).get()
+        organizer_url = urljoin(
+            BASE_URL,
+            tender.css('td.row-placer_name a::attr(href)').get()
+        )
         customer_url = urljoin(
             BASE_URL,
             tender.css('td.row-customer_name a::attr(href)').get()
@@ -237,13 +238,16 @@ class TenderSpider(scrapy.Spider):
         ).get()
         contact_person = (
             response.css(
-                'div[id="CustomerInfo-commonInfo-contactPerson-lastName"]::text'
+                'div[id="CustomerInfo-commonInfo-'
+                'contactPerson-lastName"]::text'
             ).get()
             + ' ' + response.css(
-                'div[id="CustomerInfo-commonInfo-contactPerson-firstName"]::text'
+                'div[id="CustomerInfo-commonInfo'
+                '-contactPerson-firstName"]::text'
             ).get()
             + ' ' + response.css(
-                'div[id="CustomerInfo-commonInfo-contactPerson-middleName"]::text'
+                'div[id="CustomerInfo-commonInfo-'
+                'contactPerson-middleName"]::text'
             ).get()
         )
         address = response.css(
@@ -305,13 +309,16 @@ class TenderSpider(scrapy.Spider):
         ).get()
         contact_person = (
             response.css(
-                'div[id="CustomerInfo-commonInfo-contactPerson-lastName"]::text'
+                'div[id="CustomerInfo-commonInfo-'
+                'contactPerson-lastName"]::text'
             ).get()
             + ' ' + response.css(
-                'div[id="CustomerInfo-commonInfo-contactPerson-firstName"]::text'
+                'div[id="CustomerInfo-commonInfo-'
+                'contactPerson-firstName"]::text'
             ).get()
             + ' ' + response.css(
-                'div[id="CustomerInfo-commonInfo-contactPerson-middleName"]::text'
+                'div[id="CustomerInfo-commonInfo-'
+                'contactPerson-middleName"]::text'
             ).get()
         )
         address = response.css(

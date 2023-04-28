@@ -57,26 +57,33 @@ class JuridicalPerson(models.Model):
 
     name = models.TextField(
         verbose_name='Наименование юрлица',
+        null=True,
+        db_index=True
     )
     short_name = models.TextField(
         verbose_name='Краткое наименование',
+        db_index=True,
         null=True
     )
     registration_date = models.DateTimeField(
-        verbose_name='Дата регистрации'
+        verbose_name='Дата регистрации',
+        null=True
     )
     inn = models.CharField(
         verbose_name='ИНН',
         max_length=20,
+        db_index=True,
         unique=True
     )
     ogrn = models.CharField(
         verbose_name='ОГРН',
-        max_length=20
+        max_length=20,
+        null=True
     )
     kpp = models.CharField(
         verbose_name='КПП',
-        max_length=20
+        max_length=20,
+        null=True
     )
     web_site = models.URLField(
         verbose_name='Адрес web сайта',
@@ -84,7 +91,8 @@ class JuridicalPerson(models.Model):
     )
     eis_number = models.CharField(
         verbose_name='Номер в ЕИС',
-        max_length=20
+        max_length=20,
+        null=True
     )
     telephone = models.CharField(
         verbose_name='Телефон',
@@ -92,7 +100,8 @@ class JuridicalPerson(models.Model):
         null=True
     )
     email = models.EmailField(
-        verbose_name='Электронная почта'
+        verbose_name='Электронная почта',
+        null=True
     )
     fax = models.CharField(
         verbose_name='Факс',
@@ -101,10 +110,12 @@ class JuridicalPerson(models.Model):
     )
     contact_person = models.CharField(
         verbose_name='Контактное лицо',
-        max_length=100
+        max_length=100,
+        null=True
     )
     address = models.TextField(
         verbose_name='Юридический адрес',
+        null=True
     )
     region = models.ForeignKey(
         Region,
@@ -128,6 +139,7 @@ class Tender(models.Model):
     number = models.CharField(
         verbose_name='Номер закупки',
         max_length=100,
+        db_index=True,
         unique=True
     )
     tender_type = models.ForeignKey(
@@ -139,16 +151,20 @@ class Tender(models.Model):
     )
     title = models.TextField(
         verbose_name='Наименование закупки',
-        db_index=True
+        db_index=True,
+        null=True
     )
     price = models.FloatField(
-        verbose_name='Сумма закупки (руб.)'
+        verbose_name='Сумма закупки (руб.)',
+        null=True
     )
     start_date = models.DateTimeField(
-        verbose_name='Дата начала'
+        verbose_name='Дата начала',
+        null=True
     )
     end_date = models.DateTimeField(
-        verbose_name='Дата окончания'
+        verbose_name='Дата окончания',
+        null=True
     )
     object_type = models.ForeignKey(
         ObjectType,
@@ -193,16 +209,21 @@ class TenderItem(models.Model):
 
     code = models.TextField(
         verbose_name='Код предмета по ОКПД',
+        db_index=True,
+        null=True
     )
     title = models.TextField(
         verbose_name='Наименование предмета',
-        db_index=True
+        db_index=True,
+        null=True
     )
     quantity = models.FloatField(
-        verbose_name='Количество'
+        verbose_name='Количество',
+        null=True
     )
     price = models.FloatField(
-        verbose_name='Стоимость'
+        verbose_name='Стоимость',
+        null=True
     )
     tender = models.ForeignKey(
         Tender,
@@ -213,8 +234,8 @@ class TenderItem(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Предмет закупки/контакта'
-        verbose_name_plural = 'Предметы закупки/контакта'
+        verbose_name = 'Предмет закупки/контракта'
+        verbose_name_plural = 'Предметы закупки/контракта'
         constraints = [
             models.UniqueConstraint(
                 fields=('code', 'title', 'quantity', 'price', 'tender'),

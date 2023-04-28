@@ -16,6 +16,7 @@ class TenderTypeAdmin(admin.ModelAdmin):
 
 @admin.register(JuridicalPerson)
 class JuridicalPersonAdmin(admin.ModelAdmin):
+    empty_value_display = 'Не указано'
     list_display = (
         'pk',
         'name',
@@ -55,6 +56,7 @@ class RegionAdmin(admin.ModelAdmin):
 
 @admin.register(Tender)
 class TenderAdmin(admin.ModelAdmin):
+    empty_value_display = 'Не указано'
     list_display = (
         'pk',
         'tender_type',
@@ -81,6 +83,7 @@ class TenderAdmin(admin.ModelAdmin):
 
 @admin.register(TenderItem)
 class TenderItemAdmin(admin.ModelAdmin):
+    empty_value_display = 'Не указано'
     list_display = (
         'pk',
         'code',
