@@ -236,12 +236,6 @@ class TenderItem(models.Model):
     class Meta:
         verbose_name = 'Предмет закупки/контракта'
         verbose_name_plural = 'Предметы закупки/контракта'
-        constraints = [
-            models.UniqueConstraint(
-                fields=('code', 'title', 'quantity', 'price', 'tender'),
-                name='unique_tender_item'
-            )
-        ]
 
     def __str__(self):
         return self.code
